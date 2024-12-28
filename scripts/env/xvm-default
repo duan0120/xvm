@@ -7,4 +7,7 @@ echo "1.0.0" > $XVM_ROOT/version
 export XVM_VERSION=$(cat $XVM_ROOT/version)
 
 [ -f $XVM_ROOT/envs/node/default ] && . $XVM_ROOT/envs/node/default
+[ -f $XVM_ROOT/envs/go/default ] && . $XVM_ROOT/envs/go/default
+[ -f $XVM_ROOT/envs/python/default ] && . $XVM_ROOT/envs/python/default
+
 . $XVM_ROOT/scripts/env/xvm
