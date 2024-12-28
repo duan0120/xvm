@@ -35,7 +35,7 @@ check_args() {
                 continue
                 ;;
             *)
-                display_fatal "Usage: xvm go install <version> [--arch=<arch>] [--default]"
+                display_error "Usage: xvm go install <version> [--arch=<arch>] [--default]"
                 return 1
                 ;;
         esac
@@ -57,7 +57,7 @@ normalize_version() {
 check_installed() {
     local ver=$1
     if [ -d "$version_path/$ver" ]; then
-        display_message "$ver is already installed."
+        display_message "golang $ver is already installed."
         exit 0
     fi
 }
@@ -127,7 +127,7 @@ download_and_install() {
     if ! curl -s -L "$download_url" -o "golang.tar.gz"; then
         cd "$cur_path"
         rm -rf "$temp_dir"
-        display_fatal "Failed to download go"
+        display_fatal "Failed to download golang"
     fi
 
     # 创建版本目录
@@ -135,7 +135,7 @@ download_and_install() {
 
     # 解压文件
     if tar -xzf "golang.tar.gz" --strip-components=1 -C "$version_path/$ver"; then
-        display_message "$ver has been installed successfully"
+        display_message "golang $ver has been installed successfully"
         cd "$cur_path"
         rm -rf "$temp_dir"
         return 0

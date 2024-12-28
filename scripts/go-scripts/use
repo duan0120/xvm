@@ -21,7 +21,7 @@ go_use() {
 
         . "$env_path/$version"
     else
-        display_error "$version is not installed"
+        display_error "golang $version is not installed"
         return 1
     fi
 
@@ -30,5 +30,5 @@ go_use() {
         cp -f "$env_path/$version" "$env_path/default"
     fi
 
-    display_message "Now using $version"
+    display_message "Now using golang $version"
 }

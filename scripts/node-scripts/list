@@ -2,7 +2,11 @@
 
 version_path="$XVM_ROOT/versions/node"
 
-current_version=$(node -v > /dev/null 2>&1)
+if command -v go >/dev/null 2>&1; then
+    current_version=$(go env GOVERSION)
+else
+    current_version=""
+fi
 default_version=$(bash "$XVM_ROOT/scripts/node-scripts/default")
 
 # 列出所有已安装的版本

@@ -6,7 +6,11 @@ version_path=$XVM_ROOT/versions/node
 env_path=$XVM_ROOT/envs/node
 
 default_version=$(cat $version_path/default)
-current_version=$(node -v > /dev/null 2>&1)
+if command -v go >/dev/null 2>&1; then
+    current_version=$(go env GOVERSION)
+else
+    current_version=""
+fi
 
 [[ "$1" = "" ]] &&
 	display_fatal "Please specify the version"
@@ -20,18 +24,19 @@ fi
 if [[ -d $version_path/$version ]]; then
 	rm -rf $version_path/$version
 	rm -rf $env_path/$version
-	rm -rf $env_path/default
-	rm -rf $version_path/default
+	
 	display_message "$version has been uninstalled successfully"
 
     if [[ $version == $current_version ]]; then
-        display_message "$version is the current version, please use 'xvm node use <version>' to switch to another version"
+        display_message "node $version is the current version, please use 'xvm node use <version>' to switch to another version"
     fi
 
     if [[ $version == $default_version ]]; then
-        display_message "$default_version is the default version, please use 'xvm node use <version> --default' to switch to another version"
+		rm -rf $env_path/default
+		rm -rf $version_path/default
+        display_message "node $default_version is the default version, please use 'xvm node use <version> --default' to switch to another version"
     fi
 
 else
-	display_fatal "$version is not installed"
+	display_fatal "node $version is not installed"
 fi
