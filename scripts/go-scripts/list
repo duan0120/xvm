@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+version_path="$XVM_ROOT/versions/go"
+
+current_version=$(go env GOVERSION > /dev/null 2>&1)
+default_version=$(bash "$XVM_ROOT/scripts/go-scripts/default")
+
+# 列出所有已安装的版本
+if [ -d "$version_path" ]; then
+    for version in $(ls -1 "$version_path"); do
+        if [ "$version" != "default" ]; then
+            if [ "$version" = "$current_version" ]; then
+                echo -e "$version\t<- current"
+            else
+                echo "$version"
+            fi
+        fi
+    done
+fi
+
+# 在最后显示 default 信息
+if [ -n "$default_version" ]; then
+    echo ""
+    echo "default -> $default_version"
+fi

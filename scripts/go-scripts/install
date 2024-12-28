@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+
+cur_path=$(pwd)
+
+version_path=$XVM_ROOT/versions/go
+env_path=$XVM_ROOT/envs/go
+
+. "$XVM_ROOT/scripts/functions"
+
+pkg_url="https://go.dev"
+[ -f "$XVM_ROOT/scripts/go-scripts/proxy" ] && pkg_url=$(cat "$XVM_ROOT/scripts/go-scripts/proxy")
+
+check_args() {
+    if [ $# -eq 0 ] || [ $# -gt 3 ]; then
+        display_fatal "Usage: xvm go install <version> [--arch=<arch>] [--default]"
+        return 1
+    fi
+
+    # 检查参数格式
+    for arg in "$@"; do
+        case "$arg" in
+            --arch=*)
+                local arch="${arg#*=}"
+                case "$arch" in
+                    amd64|386|arm64)
+                        continue
+                        ;;
+                    *)
+                        display_fatal "Unsupported architecture: $arch. Supported architectures: amd64, 386, arm64"
+                        return 1
+                        ;;
+                esac
+                ;;
+            --default|go*|[0-9]*)
+                continue
+                ;;
+            *)
+                display_fatal "Usage: xvm go install <version> [--arch=<arch>] [--default]"
+                return 1
+                ;;
+        esac
+    done
+}
+
+# 检查和规范化版本号
+normalize_version() {
+    local ver=$1
+
+    # 确保版本号以 go 开头
+    if [[ ! $ver =~ ^go ]]; then
+        ver="go$ver"
+    fi
+    echo "$ver"
+}
+
+# 检查版本是否已安装
+check_installed() {
+    local ver=$1
+    if [ -d "$version_path/$ver" ]; then
+        display_message "$ver is already installed."
+        exit 0
+    fi
+}
+
+version_lt_16() {
+    local ver=$1
+    # 移除版本号前的 'v'
+    ver=${ver#v}
+    # 提取主版本号
+    major_ver=${ver%%.*}
+    
+    # 检查是否为有效的整数
+    if [[ ! "$major_ver" =~ ^[0-9]+$ ]]; then
+        return 1
+    fi
+    
+    if [ "$major_ver" -lt 16 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# 获取系统信息
+get_system_info() {
+    local os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    local version=$1
+    local input_arch=$2
+
+    # 如果提供了架构参数，直接使用
+    if [ -n "$input_arch" ]; then
+        echo "$os $input_arch"
+        return 0
+    fi
+
+    # 否则根据系统检测架构
+    local arch=$(uname -m)
+    case "$arch" in
+        x86_64)
+            arch="amd64"
+            ;;
+        i386|i686)
+            arch="386"
+            ;;
+        aarch64|arm64)
+            arch="arm64"
+            ;;
+        *)
+            display_fatal "Unsupported architecture: $arch"
+            ;;
+    esac
+    echo "$os $arch"
+}
+
+download_and_install() {
+    local ver=$1
+    local os=$2
+    local arch=$3
+    local default_flag=$4
+    local download_url="$pkg_url/dl/$ver.$os-$arch.tar.gz"
+    
+    # 创建临时目录
+    local temp_dir=$(mktemp -d)
+    cd "$temp_dir" || exit 1
+
+    echo "Downloading from $download_url"
+    if ! curl -s -L "$download_url" -o "golang.tar.gz"; then
+        cd "$cur_path"
+        rm -rf "$temp_dir"
+        display_fatal "Failed to download go"
+    fi
+
+    # 创建版本目录
+    mkdir -p "$version_path/$ver"
+
+    # 解压文件
+    if tar -xzf "golang.tar.gz" --strip-components=1 -C "$version_path/$ver"; then
+        display_message "$ver has been installed successfully"
+        cd "$cur_path"
+        rm -rf "$temp_dir"
+        return 0
+    else
+        cd "$cur_path"
+        rm -rf "$temp_dir"
+        rm -rf "$version_path/$ver"
+        display_fatal "Failed to extract golang"
+    fi
+}
+
+create_enviroment() {
+    local version=$1
+    local default_flag=$2
+
+    new_env_file=$env_path/$version
+	echo "export xvm_go_name; xvm_go_name=\"$version\"" > "$new_env_file"
+	echo "export GOROOT; GOROOT=\"\$XVM_ROOT/versions/go/$version\"" >> "$new_env_file"
+	echo "export GOPATH; GOPATH=\"\$XVM_ROOT/pkgsets/$version\"" >> "$new_env_file"
+	echo "export XVM_OVERLAY_PREFIX; XVM_OVERLAY_PREFIX=\"\${XVM_ROOT}/pkgsets/${version}/overlay\"" >> "$new_env_file"
+	echo "export PATH; PATH=\"\${XVM_ROOT}/pkgsets/${version}/bin:\$XVM_ROOT/versions/go/$version/bin:\${XVM_OVERLAY_PREFIX}/bin:\${PATH}\"" >> "$new_env_file"
+	echo "export LD_LIBRARY_PATH; LD_LIBRARY_PATH=\"\${XVM_OVERLAY_PREFIX}/lib:\${LD_LIBRARY_PATH}\"" >> "$new_env_file"
+	echo "export DYLD_LIBRARY_PATH; DYLD_LIBRARY_PATH=\"\${XVM_OVERLAY_PREFIX}/lib:\${DYLD_LIBRARY_PATH}\"" >> "$new_env_file"
+	echo "export PKG_CONFIG_PATH; PKG_CONFIG_PATH=\"\${XVM_OVERLAY_PREFIX}/lib/pkgconfig:\${PKG_CONFIG_PATH}\"" >> "$new_env_file"
+    
+    if [ "$2" = "--default" ]; then
+        echo "$version" > $version_path/default
+        cp -f $env_path/$version $env_path/default
+    fi
+}
+
+# 主函数
+main() {
+    check_args "$@"
+
+    version=$(normalize_version "$1")
+    check_installed "$version"
+
+    # 解析架构参数
+    local arch=""
+    local remaining_args=()
+    
+    for arg in "$@"; do
+        if [[ "$arg" == --arch=* ]]; then
+            arch="${arg#*=}"
+        else
+            remaining_args+=("$arg")
+        fi
+    done
+    
+    read os detected_arch <<< $(get_system_info "$version" "$arch")
+    download_and_install "$version" "$os" "$detected_arch" "${remaining_args[1]}"
+
+    create_enviroment "$version" "${remaining_args[1]}"
+}
+
+# 执行主函数
+main "$@"

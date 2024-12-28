@@ -36,12 +36,10 @@ output_lts_version() {
 
 main() {
     arg=$1
-    if [[ "$arg" == "" ]]; then
-        output_version
-    elif [[ "$arg" == "--lts" ]]; then
+    if [[ "$arg" == "--lts" ]]; then
         output_lts_version
     else
-        display_fatal "Unsupported option: $arg"
+        output_version
     fi
 }
 

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+. "$XVM_ROOT/scripts/functions"
+default_version=$(bash "$XVM_ROOT/scripts/go-scripts/default")
+
+display_version() {
+  version=$1
+
+  if [[ "$version" = "$default_version" ]]; then
+    echo "$version <- default"
+  else
+    echo "$version"
+  fi
+}
+
+versions=$(git ls-remote -t https://github.com/golang/go | awk -F/ '{ print $NF }' | sort)
+if [[ $? -ne 0 ]]; then
+	display_fatal "Failed to get version list from Google"
+fi
+for version in $versions; do
+  if [[ "${version:0:7}" = "release" ]]; then
+    display_version "$version"
+  elif [[ "${version:0:3}" = "go1" ]]; then
+    display_version "$version"
+  fi
+done | sort -V

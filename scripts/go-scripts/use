@@ -2,18 +2,18 @@
 
 . "$XVM_ROOT/scripts/functions"
 
-env_path=$XVM_ROOT/envs/node
-version_path=$XVM_ROOT/versions/node
+env_path=$XVM_ROOT/envs/go
+version_path=$XVM_ROOT/versions/go
 
-node_use() {
+go_use() {
     if [ $# -eq 0 ] || [ $# -eq 2 -a "$2" != "--default" ]; then
-        display_error "Usage: xvm node install <version> [--default]"
+        display_error "Usage: xvm go install <version> [--default]"
         return 1
     fi
 
     local version=$1
-    if [[ ! $version =~ ^v ]]; then
-        version="v$version"
+    if [[ ! $version =~ ^go ]]; then
+        version="go$version"
     fi
     
     if [ -f "$env_path/$version" ]; then

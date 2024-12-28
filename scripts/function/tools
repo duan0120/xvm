@@ -13,3 +13,10 @@ check_jq() {
         exit 1
     fi
 }
+
+check_git() {
+    if ! command -v git &> /dev/null; then
+        echo "Please install git first."
+        exit 1
+    fi
+}

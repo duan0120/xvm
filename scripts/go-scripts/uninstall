@@ -2,19 +2,18 @@
 
 . "$XVM_ROOT/scripts/functions"
 
-version_path=$XVM_ROOT/versions/node
-env_path=$XVM_ROOT/envs/node
+version_path=$XVM_ROOT/versions/go
+env_path=$XVM_ROOT/envs/go
 
 default_version=$(cat $version_path/default)
-current_version=$(node -v > /dev/null 2>&1)
+current_version=$(go env GOVERSION > /dev/null 2>&1)
 
 [[ "$1" = "" ]] &&
 	display_fatal "Please specify the version"
 
 version=$1
-
-if [[ ! $version =~ ^v ]]; then
-	version="v$version"
+if [[ ! $version =~ ^go ]]; then
+	version="go$version"
 fi
 
 if [[ -d $version_path/$version ]]; then
@@ -25,11 +24,11 @@ if [[ -d $version_path/$version ]]; then
 	display_message "$version has been uninstalled successfully"
 
     if [[ $version == $current_version ]]; then
-        display_message "$version is the current version, please use 'xvm node use <version>' to switch to another version"
+        display_message "$version is the current version, please use 'xvm go use <version>' to switch to another version"
     fi
 
     if [[ $version == $default_version ]]; then
-        display_message "$default_version is the default version, please use 'xvm node use <version> --default' to switch to another version"
+        display_message "$default_version is the default version, please use 'xvm go use <version> --default' to switch to another version"
     fi
 
 else

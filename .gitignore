@@ -1,3 +1,5 @@
 envs/
 versions/
 version
+scripts/go-scripts/proxy
+pkgsets/
