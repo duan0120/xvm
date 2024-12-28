@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+xvm() {
+    if [[ "$XVM_ROOT" == "" ]]; then
+		echo "XVM_ROOT not set. Please source \$XVM_ROOT/xvm"
+		return $?
+	fi
+
+	if [[ ! -d $XVM_ROOT ]]; then
+		echo "XVM_ROOT does not exist. Please reinstall XVM"
+		return $?
+	fi
+
+    mkdir -p $XVM_ROOT/versions > /dev/null 2>&1
+    mkdir -p $XVM_ROOT/envs > /dev/null 2>&1
+
+	"$XVM_ROOT/scripts/xvm" "$@"
+}

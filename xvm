@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+export XVM_ROOT=~/.xvm
+. $XVM_ROOT/scripts/env/xvm-default

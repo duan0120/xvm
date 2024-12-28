@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+mkdir -p $XVM_ROOT/versions
+mkdir -p $XVM_ROOT/envs
+
+echo "1.0.0" > $XVM_ROOT/version
+export XVM_VERSION=$(cat $XVM_ROOT/version)
+
+[ -f $XVM_ROOT/envs/default ] && . $XVM_ROOT/envs/default
+. $XVM_ROOT/scripts/env/xvm

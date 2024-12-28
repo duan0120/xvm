@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+for function in $XVM_ROOT/scripts/function/*; do
+	. "$function"
+done
