@@ -33,10 +33,30 @@ check_installed() {
     fi
 }
 
+version_lt_16() {
+    local ver=$1
+    # 移除版本号前的 'v'
+    ver=${ver#v}
+    # 提取主版本号
+    major_ver=${ver%%.*}
+    
+    # 检查是否为有效的整数
+    if [[ ! "$major_ver" =~ ^[0-9]+$ ]]; then
+        return 1
+    fi
+    
+    if [ "$major_ver" -lt 16 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # 获取系统信息
 get_system_info() {
     local os=$(uname -s | tr '[:upper:]' '[:lower:]')
     local arch=$(uname -m)
+    local version=$1
 
     # 转换架构名称为 Node.js 下载格式
     case "$arch" in
@@ -44,7 +64,11 @@ get_system_info() {
             arch="x64"
             ;;
         aarch64|arm64)
-            arch="arm64"
+            if [ "$os" = "darwin" ] && version_lt_16 "$version"; then
+                arch="x64"
+            else
+                arch="arm64"
+            fi
             ;;
         armv7l)
             arch="armv7l"
@@ -110,7 +134,7 @@ main() {
     version=$(normalize_version "$1")
     check_installed "$version" "$2"
     
-    read os arch <<< $(get_system_info)
+    read os arch <<< $(get_system_info "$version")
     download_and_install "$version" "$os" "$arch" "$2"
 
     create_enviroment "$version" "$2"
