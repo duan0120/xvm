@@ -6,5 +6,5 @@ mkdir -p $XVM_ROOT/envs
 echo "1.0.0" > $XVM_ROOT/version
 export XVM_VERSION=$(cat $XVM_ROOT/version)
 
-[ -f $XVM_ROOT/envs/default ] && . $XVM_ROOT/envs/default
+[ -f $XVM_ROOT/envs/node/default ] && . $XVM_ROOT/envs/node/default
 . $XVM_ROOT/scripts/env/xvm

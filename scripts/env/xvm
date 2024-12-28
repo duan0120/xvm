@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 xvm() {
-    if [[ "$XVM_ROOT" == "" ]]; then
+    if [[ "$XVM_ROOT" = "" ]]; then
 		echo "XVM_ROOT not set. Please source \$XVM_ROOT/xvm"
 		return $?
 	fi
@@ -14,5 +14,40 @@ xvm() {
     mkdir -p $XVM_ROOT/versions > /dev/null 2>&1
     mkdir -p $XVM_ROOT/envs > /dev/null 2>&1
 
-	"$XVM_ROOT/scripts/xvm" "$@"
+	. "$XVM_ROOT/scripts/functions" || return 1
+
+	command=$1
+	shift
+
+	case $command in
+		"--version"|"-v")
+			display_message "XVM version $XVM_VERSION"
+			;;
+		"--help"|"-h")
+			display_message "XVM is a tool for managing multiple versions of your tools"
+			;;
+		"help")
+			sub_command=$1
+			shift
+			if [ -f "$XVM_ROOT/scripts/$sub_command" ]; then
+				bash "$XVM_ROOT/scripts/$sub_command" "--help"
+			else
+				display_message "XVM is a tool for managing multiple versions of your tools"
+			fi
+			;;
+		*)
+			if [ -f "$XVM_ROOT/scripts/$command" ]; then
+				if [ "$1" = "use" ]; then
+					shift
+					command_use="$command"_use
+					. "$XVM_ROOT/scripts/$command-scripts/use"
+					"$command_use" "$@"
+				else
+					bash "$XVM_ROOT/scripts/$command" "$@"
+				fi
+			else
+				display_error "Unrecognized command line argument: '$command'"
+			fi
+			;;
+	esac
 }

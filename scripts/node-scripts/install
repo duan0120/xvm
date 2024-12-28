@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+cur_path=$(pwd)
+
+version_path=$XVM_ROOT/versions/node
+env_path=$XVM_ROOT/envs/node
+
+. "$XVM_ROOT/scripts/functions"
+
+check_args() {
+    if [ $# -eq 0 ] || [ $# -eq 2 -a "$2" != "--default" ]; then
+        display_fatal "Usage: xvm node install <version> [--default]"
+    fi
+}
+
+# 检查和规范化版本号
+normalize_version() {
+    local ver=$1
+
+    # 确保版本号以 v 开头
+    if [[ ! $ver =~ ^v ]]; then
+        ver="v$ver"
+    fi
+    echo "$ver"
+}
+
+# 检查版本是否已安装
+check_installed() {
+    local ver=$1
+    if [ -d "$version_path/$ver" ]; then
+        display_message "Node.js $ver is already installed."
+        exit 0
+    fi
+}
+
+# 获取系统信息
+get_system_info() {
+    local os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    local arch=$(uname -m)
+
+    # 转换架构名称为 Node.js 下载格式
+    case "$arch" in
+        x86_64)
+            arch="x64"
+            ;;
+        aarch64|arm64)
+            arch="arm64"
+            ;;
+        armv7l)
+            arch="armv7l"
+            ;;
+        *)
+            display_fatal "Unsupported architecture: $arch"
+            ;;
+    esac
+    echo "$os $arch"
+}
+
+# 下载并安装 Node.js
+download_and_install() {
+    local ver=$1
+    local os=$2
+    local arch=$3
+    local default_flag=$4
+    local download_url="https://nodejs.org/dist/$ver/node-$ver-$os-$arch.tar.gz"
+    
+    # 创建临时目录
+    local temp_dir=$(mktemp -d)
+    cd "$temp_dir" || exit 1
+
+    echo "Downloading from $download_url"
+    if ! curl -s -L "$download_url" -o "node.tar.gz"; then
+        cd "$cur_path"
+        rm -rf "$temp_dir"
+        display_fatal "Failed to download Node.js"
+    fi
+
+    # 创建版本目录
+    mkdir -p "$version_path/$ver"
+
+    # 解压文件
+    if tar -xzf "node.tar.gz" --strip-components=1 -C "$version_path/$ver"; then
+        display_message "Node.js $ver has been installed successfully"
+        cd "$cur_path"
+        rm -rf "$temp_dir"
+        return 0
+    else
+        cd "$cur_path"
+        rm -rf "$temp_dir"
+        rm -rf "$version_path/$ver"
+        display_fatal "Failed to extract Node.js"
+    fi
+}
+
+create_enviroment() {
+    local version=$1
+
+    echo "export NODE_NAME=$version" > $env_path/$version
+    echo 'export PATH=$XVM_ROOT/versions/node/$NODE_NAME/bin:$PATH' >> $env_path/$version
+    if [ "$2" = "--default" ]; then
+        echo "$version" > $version_path/default
+        cp -f $env_path/$version $env_path/default
+    fi
+}
+
+# 主函数
+main() {
+    check_args "$@"
+
+    version=$(normalize_version "$1")
+    check_installed "$version" "$2"
+    
+    read os arch <<< $(get_system_info)
+    download_and_install "$version" "$os" "$arch" "$2"
+
+    create_enviroment "$version" "$2"
+}
+
+# 执行主函数
+main "$@"

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+. "$XVM_ROOT/scripts/functions"
+default_version=$(bash "$XVM_ROOT/scripts/node-scripts/default")
+
+output_version() {
+    curl -s https://nodejs.org/dist/index.json | jq -r --arg default "$default_version" '
+  .[] | 
+  if .version == $default then 
+    if .lts != false then 
+      "\(.version)\t(LTS: \(.lts)) <- default"
+    else 
+      "\(.version) <- default"
+    end
+  else
+    if .lts != false then 
+      "\(.version)\t(LTS: \(.lts))"
+    else 
+      "\(.version)"
+    end
+  end
+' | sort -V
+}
+
+output_lts_version() {
+    curl -s https://nodejs.org/dist/index.json | jq -r --arg default "$default_version" '
+  .[] | 
+  select(.lts != false) |
+  if .version == $default then 
+    "\(.version)\t(LTS: \(.lts)) <- default"
+  else
+    "\(.version)\t(LTS: \(.lts))"
+  end
+' | sort -V
+}
+
+main() {
+    arg=$1
+    if [[ "$arg" == "" ]]; then
+        output_version
+    elif [[ "$arg" == "--lts" ]]; then
+        output_lts_version
+    else
+        display_fatal "Unsupported option: $arg"
+    fi
+}
+
+main "$@"

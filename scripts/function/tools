@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+check_curl() {
+    if ! command -v curl &> /dev/null; then
+        echo "Please install curl first."
+        exit 1
+    fi
+}
+
+check_jq() {
+    if ! command -v jq &> /dev/null; then
+        echo "Please install jq first."
+        exit 1
+    fi
+}

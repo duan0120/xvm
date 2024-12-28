@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+version_path="$XVM_ROOT/versions/node"
+env_path="$XVM_ROOT/envs/node"
+
+mkdir -p "$version_path"
+mkdir -p "$env_path"
+
+. "$XVM_ROOT/scripts/functions"
+
+show_usage() {
+    echo "Usage: xvm node <command> [options]"
+}
+
+main() {
+    if [ $# -eq 0 ]; then
+        show_usage
+        exit 1
+    fi
+
+    check_curl
+    check_jq
+
+    COMMAND=$1
+    shift
+
+    case $COMMAND in
+        "--help"|"-h")
+            show_usage
+            ;;
+        "list"|"ls")
+            bash "$XVM_ROOT/scripts/node-scripts/list" "$@"
+            ;;
+        "ls-remote")
+            bash "$XVM_ROOT/scripts/node-scripts/ls-remote" "$@"
+            ;;
+        "default")
+            bash "$XVM_ROOT/scripts/node-scripts/default" "$@"
+            ;;
+        "install")
+            bash "$XVM_ROOT/scripts/node-scripts/install" "$@"
+            ;;
+        "uninstall")
+            bash "$XVM_ROOT/scripts/node-scripts/uninstall" "$@"
+            ;;
+        *)
+            display_fatal "Unrecognized command line argument: '$COMMAND'"
+            ;;
+    esac    
+}
+
+main "$@"

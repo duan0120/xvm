@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+. "$XVM_ROOT/scripts/functions"
+
+env_path=$XVM_ROOT/envs/node
+version_path=$XVM_ROOT/versions/node
+
+node_use() {
+    if [ $# -eq 0 ] || [ $# -eq 2 -a "$2" != "--default" ]; then
+        display_error "Usage: xvm node install <version> [--default]"
+        return 1
+    fi
+
+    local version=$1
+    if [[ ! $version =~ ^v ]]; then
+        version="v$version"
+    fi
+    
+    if [ -f "$env_path/$version" ]; then
+        export PATH=$(echo $PATH | sed -E "s|$version_path/[^:]+/bin:?||g")
+
+        . "$env_path/$version"
+    else
+        display_error "Node.js $version is not installed"
+        return 1
+    fi
+
+    if [ "$2" = "--default" ]; then
+        echo "$version" > $version_path/default
+        cp -f "$env_path/$version" "$env_path/default"
+    fi
+
+    display_message "Now using Node.js $version"
+}

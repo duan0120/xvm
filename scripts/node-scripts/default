@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [[ -f "$XVM_ROOT/versions/node/default" ]]; then
+    default_version=$(cat "$XVM_ROOT/versions/node/default")
+else
+    default_version=""
+fi
+
+echo $default_version
