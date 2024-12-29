@@ -10,6 +10,13 @@ mkdir -p "$env_path"
 
 show_usage() {
     echo "Usage: xvm go <command> [options]"
+    echo "Commands:"
+    echo "  -h, --help     Show help for xvm go"
+    echo "  list           List all installed versions of go"
+    echo "  ls-remote      List all remote versions of go"
+    echo "  default        Set a specific version as the default"
+    echo "  install        Install a specific version of go"
+    echo "  uninstall      Uninstall a specific version of go"
 }
 
 main() {

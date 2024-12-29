@@ -10,6 +10,13 @@ mkdir -p "$env_path"
 
 show_usage() {
     echo "Usage: xvm node <command> [options]"
+    echo "Commands:"
+    echo "  -h, --help     Show help for xvm node"
+    echo "  list           List all installed versions of node"
+    echo "  ls-remote      List all remote versions of node"
+    echo "  default        Set a specific version as the default"
+    echo "  install        Install a specific version of node"
+    echo "  uninstall      Uninstall a specific version of node"
 }
 
 main() {
