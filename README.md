@@ -47,6 +47,7 @@ List available versions
 ```
 xvm node ls-remote
 xvm node ls-remote --lts
+xvm node list
 ```
 
 Install specific version
@@ -81,6 +82,7 @@ List available versions
 
 ```
 xvm go ls-remote
+xvm go list
 ```
 
 Install specific version
