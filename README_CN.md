@@ -90,7 +90,7 @@ xvm go list
 ```
 xvm go install go1.19.2
 xvm go install go1.19.2 --default
-xvm go install go1.13.10 --default --arch amd64
+xvm go install go1.13.10 --default --arch=amd64
 ```
 
 如果需要指定下载地址，可以在 **~/.xvm/scripts/go-scripts/proxy** 文件中指定，如 https://golang.google.cn
