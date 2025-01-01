@@ -17,6 +17,7 @@ show_usage() {
     echo "  default        Set a specific version as the default"
     echo "  install        Install a specific version of node"
     echo "  uninstall      Uninstall a specific version of node"
+    echo "  use            Use a specific version of node"
 }
 
 main() {
