@@ -7,6 +7,23 @@ env_path=$XVM_ROOT/envs/python
 
 . "$XVM_ROOT/scripts/functions"
 
+# 获取系统CPU核心数
+get_cpu_cores() {
+    local cores=1
+    case "$(uname -s)" in
+        Darwin*)    # macOS
+            cores=$(sysctl -n hw.ncpu)
+            ;;
+        Linux*)     # Linux
+            cores=$(nproc 2>/dev/null || grep -c ^processor /proc/cpuinfo)
+            ;;
+        *)          # 其他系统默认使用1个核心
+            cores=1
+            ;;
+    esac
+    echo "$cores"
+}
+
 # 检查版本号是否合法且存在
 check_version() {
     local version=$1
@@ -60,8 +77,9 @@ install_version() {
         display_fatal "Failed to configure Python ${version}"
         exit 1
     fi
-
-    make -j$(nproc) >> "$log_file" 2>&1
+    
+    # 使用get_cpu_cores获取CPU核心数
+    make -j$(get_cpu_cores) >> "$log_file" 2>&1
     if [ $? -ne 0 ]; then
         display_message "Check log file: $log_file"
         display_fatal "Failed to build Python ${version}"
