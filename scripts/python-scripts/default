@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [[ -f "$XVM_ROOT/versions/go/default" ]]; then
-    default_version=$(cat "$XVM_ROOT/versions/go/default")
+if [[ -f "$XVM_ROOT/versions/python/default" ]]; then
+    default_version=$(cat "$XVM_ROOT/versions/python/default")
 else
     default_version=""
 fi
