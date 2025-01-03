@@ -15,6 +15,12 @@
 ## 安装方式
 
 ```
+curl -o- https://raw.githubusercontent.com/duan0120/xvm/main/install.sh | bash
+```
+
+或者
+
+```
 git clone https://github.com/duan0120/xvm.git ~/.xvm
 ```
 

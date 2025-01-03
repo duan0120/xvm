@@ -15,6 +15,12 @@ These tools are all very powerful, but their usage methods differ from each othe
 ## Installation
 
 ```
+curl -o- https://raw.githubusercontent.com/duan0120/xvm/main/install.sh | bash
+```
+
+or
+
+```
 git clone https://github.com/duan0120/xvm.git ~/.xvm
 ```
 
