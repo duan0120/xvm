@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+. "$XVM_ROOT/scripts/functions"
+default_version=$(bash "$XVM_ROOT/scripts/python-scripts/default")
+
+display_version() {
+  version=$1
+
+  if [[ "$version" = "$default_version" ]]; then
+    echo "$version <- default"
+  else
+    echo "$version"
+  fi
+}
+
+versions=$(git ls-remote -t https://github.com/python/cpython | awk -F/ '{ print $NF }' | sort)
+if [[ $? -ne 0 ]]; then
+	display_fatal "Failed to get version list from Python"
+fi
+for version in $versions; do
+    # Only show release versions (e.g. v3.9.0) and skip other tags
+    if [[ $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        # Remove the 'v' prefix
+        clean_version=${version#v}
+        display_version "$clean_version"
+    fi
+done | sort -V

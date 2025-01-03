@@ -1,0 +1,40 @@
+. "$XVM_ROOT/scripts/functions"
+
+version_path=$XVM_ROOT/versions/python
+
+python_activate() {
+    # 参数检查
+    if [ $# -ne 1 ]; then
+        display_error "Usage: xvm python activate <alias_name>"
+        return 1
+    fi
+
+    local alias_name=$1
+
+    # 检查虚拟环境是否存在
+    if [ ! -f "$version_path/.$alias_name" ]; then
+        display_error "Virtual environment '$alias_name' does not exist"
+        return 1
+    fi
+
+    if [ ! -d "$version_path/$alias_name" ]; then
+        display_error "Virtual environment '$alias_name' is corrupted"
+        return 1
+    fi
+
+    # 获取虚拟环境的基础Python版本
+    local base_version=$(cat "$version_path/.$alias_name")
+    local venv_path="$version_path/$alias_name"
+    
+    # 保存原有的 PS1 并修改提示符
+    export _OLD_VIRTUAL_PS1="${PS1:-}"
+    export PS1="($alias_name) ${PS1:-}"
+    
+    # 设置新的环境变量
+    export VIRTUAL_ENV="$venv_path"
+    export PATH="$venv_path/bin:$PATH"
+
+    # 显示激活信息
+    display_message "Activated Python virtual environment: $alias_name (based on Python $base_version)"
+    display_message "Type 'xvm python deactivate' to deactivate"
+}

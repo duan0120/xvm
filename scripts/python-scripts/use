@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+. "$XVM_ROOT/scripts/functions"
+
+env_path=$XVM_ROOT/envs/python
+version_path=$XVM_ROOT/versions/python
+
+python_use() {
+    if [ $# -eq 0 ] || [ $# -eq 2 -a "$2" != "--default" ]; then
+        display_error "Usage: xvm python use <version> [--default]"
+        return 1
+    fi
+
+    local version=$1
+
+    # 检查是否为虚拟环境
+    if [ -f "$version_path/.$version" ]; then
+        display_error "Cannot use virtual environment directly."
+        display_error "Please use 'xvm python activate $version' to activate virtual environment."
+        return 1
+    fi
+    
+    if [ -f "$env_path/$version" ]; then
+        export PATH=$(echo $PATH | sed -E "s|$version_path/[^:]+/bin:?||g")
+
+        . "$env_path/$version"
+    else
+        display_error "python $version is not installed"
+        return 1
+    fi
+
+    if [ "$2" = "--default" ]; then
+        echo "$version" > $version_path/default
+        cp -f "$env_path/$version" "$env_path/default"
+    fi
+
+    display_message "Now using python $version"
+}

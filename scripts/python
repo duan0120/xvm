@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+version_path="$XVM_ROOT/versions/python"
+env_path="$XVM_ROOT/envs/python"
+
+mkdir -p "$version_path"
+mkdir -p "$env_path"
+
+. "$XVM_ROOT/scripts/functions"
+
+show_usage() {
+    echo "Usage: xvm python <command> [options]"
+    echo "Commands:"
+    echo "  -h, --help     Show help for xvm python"
+    echo "  list           List all installed versions of python"
+    echo "  ls-remote      List all remote versions of python"
+    echo "  default        Set a specific version as the default"
+    echo "  install        Install a specific version of python"
+    echo "  uninstall      Uninstall a specific version of python"
+    echo "  use            Use a specific version of python"
+    echo "  alias          Create an alias for a specific version of python"
+    echo "  activate       Activate a specific version of python"
+    echo "  deactivate     Deactivate the current version of python"
+}
+
+main() {
+    if [ $# -eq 0 ]; then
+        show_usage
+        exit 1
+    fi
+
+    check_curl
+    check_git
+
+    COMMAND=$1
+    shift
+
+    case $COMMAND in
+        "--help"|"-h")
+            show_usage
+            ;;
+        "list"|"ls")
+            bash "$XVM_ROOT/scripts/python-scripts/list" "$@"
+            ;;
+        "ls-remote")
+            bash "$XVM_ROOT/scripts/python-scripts/ls-remote" "$@"
+            ;;
+        "default")
+            bash "$XVM_ROOT/scripts/python-scripts/default" "$@"
+            ;;
+        "install")
+            bash "$XVM_ROOT/scripts/python-scripts/install" "$@"
+            ;;
+        "uninstall")
+            bash "$XVM_ROOT/scripts/python-scripts/uninstall" "$@"
+            ;;
+        *)
+            display_fatal "Unrecognized command line argument: '$COMMAND'"
+            ;;
+    esac    
+}
+
+main "$@"

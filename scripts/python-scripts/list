@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+version_path="$XVM_ROOT/versions/python"
+
+if command -v python >/dev/null 2>&1; then
+    current_version=$(python --version 2>&1 | awk '{print $2}')
+else
+    current_version=""
+fi
+default_version=$(bash "$XVM_ROOT/scripts/python-scripts/default")
+
+# 列出所有已安装的版本和虚拟环境
+if [ -d "$version_path" ]; then
+    # 先显示正常版本目录
+    for item in $(ls -A "$version_path"); do
+        # 跳过 default 文件和虚拟环境配置文件
+        if [ "$item" = "default" ] || [[ "$item" =~ ^\. ]]; then
+            continue
+        fi
+        
+        # 处理正常版本目录
+        if [[ "$item" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if [ "$item" = "$current_version" ]; then
+                echo -e "$item\t<- current"
+            else
+                echo "$item"
+            fi
+        fi
+    done
+
+    # 再显示虚拟环境
+    for item in $(ls -A "$version_path"); do
+        # 只处理虚拟环境配置文件
+        if [[ "$item" =~ ^\. ]]; then
+            env_name=${item:1}  # 移除开头的点
+            if [ -d "$version_path/$env_name" ]; then
+                base_version=$(cat "$version_path/$item")
+                if [ "$env_name" = "$current_version" ]; then
+                    echo -e "$env_name ($base_version)\t<- current"
+                else
+                    echo "$env_name ($base_version)"
+                fi
+            fi
+        fi
+    done
+fi
+
+# 在最后显示 default 信息
+if [ -n "$default_version" ]; then
+    echo ""
+    echo "default -> $default_version"
+fi

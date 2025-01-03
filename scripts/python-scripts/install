@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+
+cur_path=$(pwd)
+
+version_path=$XVM_ROOT/versions/python
+env_path=$XVM_ROOT/envs/python
+
+. "$XVM_ROOT/scripts/functions"
+
+# 检查版本号是否合法且存在
+check_version() {
+    local version=$1
+    
+    # 检查版本号格式
+    if ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        display_fatal "Invalid version format. Expected format: X.Y.Z (e.g. 3.9.0)"
+        exit 1
+    fi
+    
+    # 检查版本是否已安装
+    if [ -d "$version_path/$version" ]; then
+        display_fatal "Version ${version} is already installed"
+        exit 1
+    fi
+}
+
+# 下载并安装指定版本
+install_version() {
+    local version=$1
+    local temp_dir=$(mktemp -d)
+    local build_path="$temp_dir/Python-${version}/build-library"
+    local log_file="$temp_dir/install.log"
+    
+    # 下载源码包
+    display_message "Downloading https://www.python.org/ftp/python/${version}/Python-${version}.tgz"
+    cd "$temp_dir"
+    curl -sS "https://www.python.org/ftp/python/${version}/Python-${version}.tgz" > "Python-${version}.tgz" 2>> "$log_file"
+    if [ $? -ne 0 ]; then
+        display_fatal "Failed to download Python ${version}"
+        exit 1
+    fi
+    
+    # 解压源码
+    display_message "Extracting Python ${version}..."
+    tar xzf "Python-${version}.tgz" >> "$log_file" 2>&1
+    if [ $? -ne 0 ]; then
+        display_fatal "Failed to extract Python ${version}"
+        exit 1
+    fi
+    
+    display_message "Building Python ${version}..."
+    # 进入源码目录并创建build目录
+    cd "Python-${version}"
+    mkdir -p $build_path
+    
+    # 配置和编译，添加优化选项
+    ./configure --prefix="$build_path" --enable-optimizations >> "$log_file" 2>&1
+    if [ $? -ne 0 ]; then
+        display_message "Check log file: $log_file"
+        display_fatal "Failed to configure Python ${version}"
+        exit 1
+    fi
+
+    make -j$(nproc) >> "$log_file" 2>&1
+    if [ $? -ne 0 ]; then
+        display_message "Check log file: $log_file"
+        display_fatal "Failed to build Python ${version}"
+        exit 1
+    fi
+
+    make install >> "$log_file" 2>&1
+    if [ $? -ne 0 ]; then
+        display_message "Check log file: $log_file"
+        display_fatal "Failed to install Python ${version}"
+        exit 1
+    fi
+
+    # 创建版本目录并复制整个Python目录
+    cp -rf "$build_path" "$version_path/$version"
+    
+    # 创建 python 软链接
+    local bin_path="$version_path/$version/bin"
+    if [ -f "$bin_path/python3" ]; then
+        ln -sf "$bin_path/python3" "$bin_path/python"
+    elif [ -f "$bin_path/python2" ]; then
+        ln -sf "$bin_path/python2" "$bin_path/python"
+    fi
+    
+    cd "$cur_path"
+    rm -rf "$temp_dir"
+
+    display_message "Python ${version} has been built successfully."
+}
+
+create_enviroment() {
+    local version=$1
+    local default_flag=$2
+
+    new_env_file=$env_path/$version
+	echo "export xvm_python; xvm_python=\"$version\"" > "$new_env_file"
+    echo "export PATH; PATH=\"\$XVM_ROOT/versions/python/\$xvm_python/bin:\$PATH\"" >> "$new_env_file"
+    
+    if [ "$2" = "--default" ]; then
+        echo "$version" > $version_path/default
+        cp -f $env_path/$version $env_path/default
+    fi
+}
+
+# 主函数
+main() {
+    local version=""
+    local set_default=false
+
+    # 解析参数
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --default)
+                set_default=true
+                shift
+                ;;
+            *)
+                if [ -z "$version" ]; then
+                    version=$1
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # 检查是否提供版本号
+    if [ -z "$version" ]; then
+        display_fatal "Please specify a version to install"
+    fi
+    
+    # 检查版本
+    check_version "$version"
+    
+    # 安装版本
+    install_version "$version"
+
+    if [ "$set_default" = true ]; then 
+        create_enviroment "$version" "--default"
+    else
+        create_enviroment "$version"
+    fi
+
+    display_message "Python ${version} has been installed successfully."
+}
+
+# 执行主函数
+main "$@"

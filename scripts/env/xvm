@@ -30,6 +30,7 @@ xvm() {
 			display_message "  -h, --help     Show help for xvm"
 			display_message "  node           Manage node versions"
 			display_message "  go             Manage go versions"
+			display_message "  python         Manage python versions"
 			display_message "  help           Show help for a command"
 			display_message ""
 			display_message "See 'xvm help <command>' for information on a specific command."
@@ -43,12 +44,27 @@ xvm() {
 				display_message "Usage: xvm <command> [options]"
 			fi
 			;;
+		"python")
+			if [ -f "$XVM_ROOT/scripts/python" ]; then
+				if [ "$1" = "use" ] || [ "$1" = "alias" ] || [ "$1" = "activate" ] || [ "$1" = "deactivate" ]; then
+					sub_command="python_$1"
+					. "$XVM_ROOT/scripts/$command-scripts/$1"
+
+					shift
+					"$sub_command" "$@"
+				else
+					bash "$XVM_ROOT/scripts/$command" "$@"
+				fi
+			else
+				display_message "Usage: xvm <command> [options]"
+			fi
+			;;
 		*)
 			if [ -f "$XVM_ROOT/scripts/$command" ]; then
 				if [ "$1" = "use" ]; then
-					shift
 					command_use="$command"_use
 					. "$XVM_ROOT/scripts/$command-scripts/use"
+					shift
 					"$command_use" "$@"
 				else
 					bash "$XVM_ROOT/scripts/$command" "$@"

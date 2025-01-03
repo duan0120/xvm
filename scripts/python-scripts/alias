@@ -1,0 +1,57 @@
+. "$XVM_ROOT/scripts/functions"
+
+version_path=$XVM_ROOT/versions/python
+
+python_alias() {
+    # 检查参数
+    if [ $# -lt 2 ]; then
+        display_fatal "Usage: xvm python alias <base_version> <alias_name>"
+        exit 1
+    fi
+
+    local base_version=$1
+    local alias_name=$2
+
+    # 检查基础版本格式
+    if ! [[ $base_version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        display_fatal "Invalid version format. Expected format: X.Y.Z (e.g. 3.12.2)"
+        exit 1
+    fi
+
+    # 检查别名格式（只允许字母、数字、下划线）
+    if ! [[ $alias_name =~ ^[a-zA-Z0-9_]+$ ]]; then
+        display_fatal "Invalid alias name. Only letters, numbers and underscore are allowed"
+        exit 1
+    fi
+
+    # 检查基础版本是否存在
+    if [ ! -d "$version_path/$base_version" ]; then
+        display_fatal "Python $base_version is not installed. Please install it first: xvm python install $base_version"
+        exit 1
+    fi
+
+    # 检查虚拟环境是否已存在
+    if [ -d "$version_path/$alias_name" ]; then
+        display_fatal "Virtual environment '$alias_name' already exists"
+        exit 1
+    fi
+
+    # 检查配置文件是否已存在
+    if [ -f "$version_path/.$alias_name" ]; then
+        display_fatal "Virtual environment configuration '$alias_name' already exists"
+        exit 1
+    fi
+
+    # 复制Python环境
+    cp -rf "$version_path/$base_version" "$version_path/$alias_name"
+    if [ $? -ne 0 ]; then
+        display_fatal "Failed to create virtual environment '$alias_name'"
+        exit 1
+    fi
+
+    # 创建配置文件，记录基础版本
+    echo "$base_version" > "$version_path/.$alias_name"
+
+    display_message "Virtual environment '$alias_name' has been created successfully based on Python $base_version"
+    display_message "Use 'xvm python activate $alias_name' to activate this environment"
+}
