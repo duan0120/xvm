@@ -111,3 +111,60 @@ Check default version
 ```
 xvm go default
 ```
+
+### python
+
+Install dependencies
+  Source code compilation installation, please refer to [https://devguide.python.org/getting-started/setup-building/]()
+
+Check version
+
+```
+xvm python ls-remote
+xvm python list
+```
+
+Install specific version
+
+```
+xvm python install 3.12.0
+xvm python install 3.12.0 --default
+```
+
+Uninstall specific version
+
+```
+xvm python uninstall 3.12.0
+xvm python uninstall venv
+```
+
+Switch version
+
+```
+xvm python use 3.12.0
+xvm python use 3.12.0 --default
+```
+
+Check default version
+
+```
+xvm python default
+```
+
+Create virtual environment
+
+```
+xvm python alias 3.12.0 venv
+```
+
+Activate virtual environment
+
+```
+xvm python activate venv
+```
+
+Deactivate virtual environment
+
+```
+xvm python deactivate
+```

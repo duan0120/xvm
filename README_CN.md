@@ -113,3 +113,60 @@ xvm go use go1.19.2 --default
 ```
 xvm go default
 ```
+
+### python
+
+安装依赖
+源码编译安装，需要安装依赖，请参考 [https://devguide.python.org/getting-started/setup-building/]()
+
+查看版本
+
+```
+xvm python ls-remote
+xvm python list
+```
+
+安装指定版本
+
+```
+xvm python install 3.12.0
+xvm python install 3.12.0 --default
+```
+
+卸载指定版本
+
+```
+xvm python uninstall 3.12.0
+xvm python uninstall venv
+```
+
+切换版本
+
+```
+xvm python use 3.12.0
+xvm python use 3.12.0 --default
+```
+
+查看默认版本
+
+```
+xvm python default
+```
+
+创建虚拟环境
+
+```
+xvm python alias 3.12.0 venv
+```
+
+激活虚拟环境
+
+```
+xvm python activate venv
+```
+
+撤销虚拟环境
+
+```
+xvm python deactivate
+```
