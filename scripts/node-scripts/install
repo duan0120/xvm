@@ -93,7 +93,7 @@ download_and_install() {
     cd "$temp_dir" || exit 1
 
     echo "Downloading from $download_url"
-    if ! curl -s -L "node $download_url" -o "node.tar.gz"; then
+    if ! curl -s -L "$download_url" -o "node.tar.gz"; then
         cd "$cur_path"
         rm -rf "$temp_dir"
         display_fatal "Failed to download node"
