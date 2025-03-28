@@ -14,7 +14,7 @@ show_usage() {
     echo "  -h, --help     Show help for xvm node"
     echo "  list           List all installed versions of node"
     echo "  ls-remote      List all remote versions of node"
-    echo "  default        Set a specific version as the default"
+    echo "  default        Show the default version of node"
     echo "  install        Install a specific version of node"
     echo "  uninstall      Uninstall a specific version of node"
     echo "  use            Use a specific version of node"

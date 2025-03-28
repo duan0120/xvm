@@ -14,7 +14,7 @@ show_usage() {
     echo "  -h, --help     Show help for xvm python"
     echo "  list           List all installed versions of python"
     echo "  ls-remote      List all remote versions of python"
-    echo "  default        Set a specific version as the default"
+    echo "  default        Show the default version of python"
     echo "  install        Install a specific version of python"
     echo "  uninstall      Uninstall a specific version of python"
     echo "  use            Use a specific version of python"
