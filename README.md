@@ -96,6 +96,7 @@ Install specific version
 ```
 xvm go install go1.19.2
 xvm go install go1.19.2 --default
+# arch: amd64/arm64/386, default arch: amd64
 xvm go install go1.13.10 --default --arch=amd64
 ```
 

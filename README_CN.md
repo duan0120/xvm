@@ -96,6 +96,7 @@ xvm go list
 ```
 xvm go install go1.19.2
 xvm go install go1.19.2 --default
+# 指定架构，amd64/386/arm64, 默认为amd64
 xvm go install go1.13.10 --default --arch=amd64
 ```
 
