@@ -69,9 +69,17 @@ install_version() {
     # 进入源码目录并创建build目录
     cd "Python-${version}"
     mkdir -p $build_path
+
+    display_message "Applying patches for Python ${version}..."
+
+    if [ -d "$XVM_ROOT/scripts/python-scripts/patches/${version}/Python-${version}" ]; then
+        git apply $XVM_ROOT/scripts/python-scripts/patches/${version}/Python-${version}/*.patch
+    fi
+
+    display_message "Configuring Python ${version}..."
     
     # 配置和编译，添加优化选项
-    ./configure --prefix="$build_path" --enable-optimizations >> "$log_file" 2>&1
+    ./configure --prefix="$build_path" --enable-optimizations --with-ensurepip=install >> "$log_file" 2>&1
     if [ $? -ne 0 ]; then
         display_message "Check log file: $log_file"
         display_fatal "Failed to configure Python ${version}"
